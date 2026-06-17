@@ -3,14 +3,21 @@
 import { BookOpen, History, LogIn, Monitor, ListChecks } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-const navItems = [
+export type ViewId = "live-log" | "history" | "end-of-day" | "machines"
+
+const navItems: { id: ViewId; label: string; icon: typeof LogIn }[] = [
   { id: "live-log", label: "Live Log", icon: LogIn },
   { id: "history", label: "History", icon: History },
   { id: "end-of-day", label: "End of Day", icon: ListChecks },
   { id: "machines", label: "Machines", icon: Monitor },
 ]
 
-export function Sidebar() {
+interface SidebarProps {
+  activeView: ViewId
+  onNavigate: (view: ViewId) => void
+}
+
+export function Sidebar({ activeView, onNavigate }: SidebarProps) {
   return (
     <aside className="w-60 min-h-screen border-r border-green-200 bg-white flex flex-col shrink-0">
       <div className="p-5 border-b border-green-100">
@@ -30,10 +37,11 @@ export function Sidebar() {
         <nav className="flex flex-col gap-1">
           {navItems.map((item) => {
             const Icon = item.icon
-            const isActive = item.id === "live-log"
+            const isActive = item.id === activeView
             return (
               <button
                 key={item.id}
+                onClick={() => onNavigate(item.id)}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all",
                   isActive
