@@ -35,11 +35,11 @@ export default function Home() {
           </button>
         </header>
 
-        <main className="flex-1 p-5 grid grid-cols-1 lg:grid-cols-2 gap-5 overflow-auto">
-          <div>
+        <main className="flex-1 p-5 flex flex-col lg:flex-row gap-5 min-h-0">
+          <div className="lg:w-[440px] shrink-0 self-start lg:self-stretch flex flex-col">
             <TransactionForm onLogTransaction={handleLogTransaction} />
           </div>
-          <div className="h-full">
+          <div className="flex-1 min-h-0 flex flex-col">
             <ActivityFeed transactions={transactions} />
           </div>
         </main>
