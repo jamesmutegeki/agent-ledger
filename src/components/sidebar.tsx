@@ -1,12 +1,11 @@
 "use client"
 
-import { BookOpen, History, LogIn, Monitor, ListChecks } from "lucide-react"
+import { BookOpen, History, List, Monitor, ListChecks } from "lucide-react"
 import { cn } from "@/lib/utils"
+import type { ViewId } from "@/lib/types"
 
-export type ViewId = "live-log" | "history" | "end-of-day" | "machines"
-
-const navItems: { id: ViewId; label: string; icon: typeof LogIn }[] = [
-  { id: "live-log", label: "Live Log", icon: LogIn },
+const navItems: { id: ViewId; label: string; icon: typeof History }[] = [
+  { id: "live-log", label: "Live Log", icon: List },
   { id: "history", label: "History", icon: History },
   { id: "end-of-day", label: "End of Day", icon: ListChecks },
   { id: "machines", label: "Machines", icon: Monitor },

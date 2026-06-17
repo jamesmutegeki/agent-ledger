@@ -7,25 +7,13 @@ import {
   Receipt,
   Wifi,
   RefreshCw,
+  Speaker,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-
-export type TransactionType =
-  | "deposit"
-  | "withdrawal"
-  | "bill-payment"
-  | "airtime"
-  | "float-topup"
-
-export interface Transaction {
-  id: string
-  timestamp: string
-  type: TransactionType
-  amount: number
-  reference: string
-  isSuccessful: boolean
-  commission: number
-}
+import type { Transaction, TransactionType } from "@/lib/types"
+import { generateId, isInflow } from "@/lib/types"
+import { formatTimestamp, formatCurrency } from "@/lib/format"
+import { calculateCommission, sanitizeReference } from "@/lib/transactions"
 
 interface TransactionFormProps {
   onLogTransaction: (tx: Transaction) => void
@@ -43,10 +31,22 @@ const txTypes: {
   { id: "float-topup", label: "Float Top-up", icon: RefreshCw },
 ]
 
-function calculateCommission(amount: number): number {
-  if (amount <= 0) return 0
-  if (amount <= 5000) return 100
-  return Math.round(amount * 0.02)
+function playChime() {
+  try {
+    const ctx = new AudioContext()
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+    osc.frequency.value = 880
+    osc.type = "sine"
+    gain.gain.setValueAtTime(0.3, ctx.currentTime)
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15)
+    osc.start()
+    osc.stop(ctx.currentTime + 0.15)
+  } catch {
+    // Audio not available
+  }
 }
 
 export function TransactionForm({ onLogTransaction }: TransactionFormProps) {
@@ -56,48 +56,51 @@ export function TransactionForm({ onLogTransaction }: TransactionFormProps) {
   const [isSuccessful, setIsSuccessful] = useState<boolean>(true)
   const [isAnimating, setIsAnimating] = useState(false)
   const [validationError, setValidationError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
   const amountRef = useRef<HTMLInputElement>(null)
+  const animTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const validationTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
-  const commission = calculateCommission(Number(amount) || 0)
+  const commission = calculateCommission(transactionType, Number(amount) || 0)
 
   const handleLogTransaction = useCallback(() => {
+    if (submitting) return
     const numAmount = Number(amount)
     if (numAmount <= 0) {
       setValidationError("Amount must be greater than 0")
-      setTimeout(() => setValidationError(null), 2500)
+      if (validationTimeoutRef.current) clearTimeout(validationTimeoutRef.current)
+      validationTimeoutRef.current = setTimeout(() => setValidationError(null), 2500)
       amountRef.current?.focus()
       return
     }
     setValidationError(null)
-
-    const now = new Date()
-    const hours = now.getHours()
-    const minutes = now.getMinutes()
-    const ampm = hours >= 12 ? "PM" : "AM"
-    const h12 = hours % 12 || 12
-    const timestamp = `${h12}:${minutes.toString().padStart(2, "0")} ${ampm}`
+    setSubmitting(true)
 
     const tx: Transaction = {
-      id:
-        crypto.randomUUID?.() ||
-        `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-      timestamp,
+      id: generateId(),
+      timestamp: formatTimestamp(new Date()),
       type: transactionType,
       amount: numAmount,
-      reference,
+      reference: sanitizeReference(reference),
       isSuccessful,
       commission,
     }
 
     onLogTransaction(tx)
+
+    if (isSuccessful) playChime()
+
     setIsAnimating(true)
-    setTimeout(() => setIsAnimating(false), 1200)
+    if (animTimeoutRef.current) clearTimeout(animTimeoutRef.current)
+    animTimeoutRef.current = setTimeout(() => setIsAnimating(false), 1200)
+
     setAmount("0")
     setReference("")
     setTransactionType("deposit")
     setIsSuccessful(true)
+    setTimeout(() => setSubmitting(false), 300)
     amountRef.current?.focus()
-  }, [amount, reference, transactionType, isSuccessful, commission, onLogTransaction])
+  }, [amount, reference, transactionType, isSuccessful, commission, onLogTransaction, submitting])
 
   const handleClear = useCallback(() => {
     setAmount("0")
@@ -121,6 +124,8 @@ export function TransactionForm({ onLogTransaction }: TransactionFormProps) {
   const TypeIcon =
     txTypes.find((t) => t.id === transactionType)?.icon || ArrowDownToLine
 
+  const inflow = isInflow({ type: transactionType })
+
   return (
     <div
       className={cn(
@@ -129,7 +134,6 @@ export function TransactionForm({ onLogTransaction }: TransactionFormProps) {
           ? "border-green-400 dark:border-green-500 bg-green-50 dark:bg-green-950/30 ring-1 ring-green-200 dark:ring-green-800"
           : "border-green-200 dark:border-zinc-800"
       )}
-      onKeyDown={handleKeyDown}
     >
       <div className="flex items-center gap-2 mb-5">
         <div className="w-7 h-7 rounded-lg bg-green-100 dark:bg-green-900/50 flex items-center justify-center">
@@ -162,7 +166,7 @@ export function TransactionForm({ onLogTransaction }: TransactionFormProps) {
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-3 mb-4">
+      <div className="grid grid-cols-2 gap-3 mb-4" onKeyDown={handleKeyDown}>
         <div>
           <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1.5">
             Amount (UGX)
@@ -183,6 +187,7 @@ export function TransactionForm({ onLogTransaction }: TransactionFormProps) {
           </label>
           <input
             type="text"
+            maxLength={50}
             value={reference}
             onChange={(e) => setReference(e.target.value)}
             className="w-full px-3 py-2.5 border border-gray-200 dark:border-zinc-700 rounded-lg text-sm text-gray-800 dark:text-zinc-200 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 transition-all"
@@ -216,12 +221,15 @@ export function TransactionForm({ onLogTransaction }: TransactionFormProps) {
           </div>
           <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Successful</span>
         </label>
-        <p className="text-sm text-gray-500 dark:text-zinc-400">
-          Est. commission:{" "}
-          <span className="font-semibold text-green-700 dark:text-green-400">
-            UGX {commission.toLocaleString()}
-          </span>
-        </p>
+        <div className="flex items-center gap-2">
+          <Speaker className="w-3 h-3 text-gray-300 dark:text-zinc-600" />
+          <p className="text-sm text-gray-500 dark:text-zinc-400">
+            Est. commission:{" "}
+            <span className="font-semibold text-green-700 dark:text-green-400">
+              {formatCurrency(commission)}
+            </span>
+          </p>
+        </div>
       </div>
 
       {validationError && (
@@ -234,14 +242,21 @@ export function TransactionForm({ onLogTransaction }: TransactionFormProps) {
         <button
           type="button"
           onClick={handleLogTransaction}
-          className="flex-1 bg-green-600 dark:bg-green-500 hover:bg-green-700 dark:hover:bg-green-600 active:bg-green-800 text-white font-medium py-2.5 px-4 rounded-lg text-sm transition-all active:scale-[0.98] shadow-sm"
+          disabled={submitting}
+          className={cn(
+            "flex-1 font-medium py-2.5 px-4 rounded-lg text-sm transition-all shadow-sm",
+            submitting
+              ? "bg-green-400 dark:bg-green-600/50 text-white cursor-not-allowed"
+              : "bg-green-600 dark:bg-green-500 hover:bg-green-700 dark:hover:bg-green-600 active:bg-green-800 text-white active:scale-[0.98]"
+          )}
         >
-          Log transaction
+          {submitting ? "Logging..." : "Log transaction"}
         </button>
         <button
           type="button"
           onClick={handleClear}
-          className="px-5 py-2.5 border border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 hover:border-gray-300 dark:hover:border-zinc-600 transition-all"
+          disabled={submitting}
+          className="px-5 py-2.5 border border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 hover:border-gray-300 dark:hover:border-zinc-600 transition-all disabled:opacity-50"
         >
           Clear
         </button>

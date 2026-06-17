@@ -1,8 +1,16 @@
 import { createClient } from "@supabase/supabase-js"
-import type { TransactionType } from "@/components/transaction-form"
+import type { TransactionType } from "./types"
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+
+const validTypes: TransactionType[] = [
+  "deposit", "withdrawal", "bill-payment", "airtime", "float-topup",
+]
+
+function isValidType(val: string): val is TransactionType {
+  return validTypes.includes(val as TransactionType)
+}
 
 export const supabase = supabaseUrl && supabaseAnonKey
   ? createClient(supabaseUrl, supabaseAnonKey)
@@ -51,11 +59,14 @@ export function fromDbTransaction(row: DbTransaction): {
   reference: string
   isSuccessful: boolean
   commission: number
-} {
+} | null {
+  const type = isValidType(row.type) ? row.type : null
+  if (!type) return null
+
   return {
     id: row.id,
     timestamp: row.timestamp,
-    type: row.type as TransactionType,
+    type,
     amount: row.amount,
     reference: row.reference,
     isSuccessful: row.is_successful,
