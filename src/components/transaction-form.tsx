@@ -124,22 +124,22 @@ export function TransactionForm({ onLogTransaction }: TransactionFormProps) {
   return (
     <div
       className={cn(
-        "bg-white border rounded-xl p-5 shadow-sm transition-all duration-300",
+        "bg-white dark:bg-zinc-900 border rounded-xl p-5 shadow-sm transition-all duration-300",
         isAnimating
-          ? "border-green-400 bg-green-50 ring-1 ring-green-200"
-          : "border-green-200"
+          ? "border-green-400 dark:border-green-500 bg-green-50 dark:bg-green-950/30 ring-1 ring-green-200 dark:ring-green-800"
+          : "border-green-200 dark:border-zinc-800"
       )}
       onKeyDown={handleKeyDown}
     >
       <div className="flex items-center gap-2 mb-5">
-        <div className="w-7 h-7 rounded-lg bg-green-100 flex items-center justify-center">
-          <TypeIcon className="w-3.5 h-3.5 text-green-600" />
+        <div className="w-7 h-7 rounded-lg bg-green-100 dark:bg-green-900/50 flex items-center justify-center">
+          <TypeIcon className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
         </div>
         <div>
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+          <p className="text-xs font-semibold text-gray-400 dark:text-zinc-500 uppercase tracking-wider">
             New Transaction
           </p>
-          <p className="text-[10px] text-gray-300">Fill in the details below</p>
+          <p className="text-[10px] text-gray-300 dark:text-zinc-600">Fill in the details below</p>
         </div>
       </div>
 
@@ -152,8 +152,8 @@ export function TransactionForm({ onLogTransaction }: TransactionFormProps) {
             className={cn(
               "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
               transactionType === id
-                ? "bg-green-600 text-white border-green-600 shadow-sm"
-                : "bg-white text-gray-500 border-gray-200 hover:border-green-300 hover:text-green-600 hover:bg-green-50"
+                ? "bg-green-600 dark:bg-green-500 text-white border-green-600 dark:border-green-500 shadow-sm"
+                : "bg-white dark:bg-zinc-800 text-gray-500 dark:text-zinc-400 border-gray-200 dark:border-zinc-700 hover:border-green-300 hover:text-green-600 hover:bg-green-50 dark:hover:bg-zinc-700 dark:hover:border-green-600 dark:hover:text-green-400"
             )}
           >
             <Icon className="w-3.5 h-3.5" />
@@ -164,7 +164,7 @@ export function TransactionForm({ onLogTransaction }: TransactionFormProps) {
 
       <div className="grid grid-cols-2 gap-3 mb-4">
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1.5">
+          <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1.5">
             Amount (UGX)
           </label>
           <input
@@ -173,25 +173,25 @@ export function TransactionForm({ onLogTransaction }: TransactionFormProps) {
             min="0"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 transition-all"
+            className="w-full px-3 py-2.5 border border-gray-200 dark:border-zinc-700 rounded-lg text-sm text-gray-800 dark:text-zinc-200 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 transition-all"
             placeholder="0"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1.5">
+          <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1.5">
             Reference / RRN
           </label>
           <input
             type="text"
             value={reference}
             onChange={(e) => setReference(e.target.value)}
-            className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 transition-all"
+            className="w-full px-3 py-2.5 border border-gray-200 dark:border-zinc-700 rounded-lg text-sm text-gray-800 dark:text-zinc-200 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 transition-all"
             placeholder="240615001"
           />
         </div>
       </div>
 
-      <div className="flex items-center justify-between mb-5 py-2 px-3 bg-gray-50 rounded-lg">
+      <div className="flex items-center justify-between mb-5 py-2 px-3 bg-gray-50 dark:bg-zinc-800/50 rounded-lg">
         <label className="flex items-center gap-3 cursor-pointer select-none">
           <div className="relative">
             <input
@@ -203,29 +203,29 @@ export function TransactionForm({ onLogTransaction }: TransactionFormProps) {
             <div
               className={cn(
                 "w-10 h-5 rounded-full transition-colors duration-200",
-                isSuccessful ? "bg-green-600" : "bg-gray-300"
+                isSuccessful ? "bg-green-600 dark:bg-green-500" : "bg-gray-300 dark:bg-zinc-600"
               )}
             >
               <div
                 className={cn(
-                  "w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-200 mt-0.5",
+                  "w-4 h-4 bg-white dark:bg-zinc-200 rounded-full shadow-sm transition-transform duration-200 mt-0.5",
                   isSuccessful ? "translate-x-5" : "translate-x-0.5"
                 )}
               />
             </div>
           </div>
-          <span className="text-sm font-medium text-gray-700">Successful</span>
+          <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Successful</span>
         </label>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-gray-500 dark:text-zinc-400">
           Est. commission:{" "}
-          <span className="font-semibold text-green-700">
+          <span className="font-semibold text-green-700 dark:text-green-400">
             UGX {commission.toLocaleString()}
           </span>
         </p>
       </div>
 
       {validationError && (
-        <p className="text-xs text-red-500 mb-3 text-center bg-red-50 py-1.5 rounded-md">
+        <p className="text-xs text-red-500 dark:text-red-400 mb-3 text-center bg-red-50 dark:bg-red-950/30 py-1.5 rounded-md">
           {validationError}
         </p>
       )}
@@ -234,21 +234,21 @@ export function TransactionForm({ onLogTransaction }: TransactionFormProps) {
         <button
           type="button"
           onClick={handleLogTransaction}
-          className="flex-1 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-medium py-2.5 px-4 rounded-lg text-sm transition-all active:scale-[0.98] shadow-sm"
+          className="flex-1 bg-green-600 dark:bg-green-500 hover:bg-green-700 dark:hover:bg-green-600 active:bg-green-800 text-white font-medium py-2.5 px-4 rounded-lg text-sm transition-all active:scale-[0.98] shadow-sm"
         >
           Log transaction
         </button>
         <button
           type="button"
           onClick={handleClear}
-          className="px-5 py-2.5 border border-gray-200 text-gray-500 rounded-lg text-sm font-medium hover:bg-gray-50 hover:border-gray-300 transition-all"
+          className="px-5 py-2.5 border border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-zinc-800 hover:border-gray-300 dark:hover:border-zinc-600 transition-all"
         >
           Clear
         </button>
       </div>
 
-      <p className="text-[11px] text-gray-400 mt-3 text-center">
-        Tip: press <kbd className="px-1 py-0.5 bg-gray-100 border border-gray-200 rounded text-[10px] font-mono">Enter</kbd> to save and instantly log the receipt.
+      <p className="text-[11px] text-gray-400 dark:text-zinc-500 mt-3 text-center">
+        Tip: press <kbd className="px-1 py-0.5 bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded text-[10px] font-mono">Enter</kbd> to save and instantly log the receipt.
       </p>
     </div>
   )
