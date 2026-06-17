@@ -26,4 +26,4 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) to use the app.
 
-You can also check it out on .[agent-edger on vercel].(https://agent-ledger-three.vercel.app/).
+You can also check it out on [Agent-ledger on Vercel](https://agent-ledger-three.vercel.app/)
