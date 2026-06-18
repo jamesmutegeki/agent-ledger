@@ -4,9 +4,10 @@ import { useMemo } from "react"
 import { useParams } from "next/navigation"
 import { ArrowLeft, Printer, BookOpen, CheckCircle, XCircle } from "lucide-react"
 import { generateDemoTransactions } from "@/lib/demo-data"
-import type { TransactionType } from "@/lib/types"
-import { isInflow, positiveTypes } from "@/lib/types"
+import type { TransactionType, Transaction } from "@/lib/types"
+import { isInflow } from "@/lib/types"
 import { formatCurrency } from "@/lib/format"
+import { safeGetItem, safeJSONParse } from "@/lib/storage"
 import { cn } from "@/lib/utils"
 
 const typeLabels: Record<TransactionType, string> = {
@@ -17,16 +18,11 @@ const typeLabels: Record<TransactionType, string> = {
   "float-topup": "Float Top-up",
 }
 
-// In a real app this would load from Supabase; for now use demo data + localStorage
-function loadTransactions() {
+function loadTransactions(): Transaction[] {
   if (typeof window === "undefined") return []
-  const raw = localStorage.getItem("agent-ledger-transactions")
+  const raw = safeGetItem("agent-ledger-transactions")
   if (raw) {
-    try {
-      return JSON.parse(raw)
-    } catch {
-      return []
-    }
+    return safeJSONParse<Transaction[]>(raw, [])
   }
   return generateDemoTransactions()
 }

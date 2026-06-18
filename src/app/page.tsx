@@ -1,26 +1,31 @@
 "use client"
 
-import { useState, useCallback, useMemo, useEffect, useRef } from "react"
+import { useState, useCallback, useMemo, useEffect } from "react"
 import { PanelRightOpen, PanelLeftClose, Sun, Moon, Monitor, Database, Trash2, AlertTriangle } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Sidebar } from "@/components/sidebar"
 import { TransactionForm } from "@/components/transaction-form"
 import { ActivityFeed } from "@/components/activity-feed"
+import { LoginForm } from "@/components/auth/login-form"
 import type { Transaction, ViewId } from "@/lib/types"
+import { isInflow } from "@/lib/types"
+import { useAuth } from "@/lib/auth"
 import { generateDemoTransactions } from "@/lib/demo-data"
 import { supabase, isSupabaseConfigured, toDbTransaction, fromDbTransaction } from "@/lib/supabase"
-import { isInflow } from "@/lib/types"
 import { formatCurrency } from "@/lib/format"
 import { exportTransactionsToCSV } from "@/lib/csv"
+import { safeGetItem, safeSetItem, safeRemoveItem } from "@/lib/storage"
 import { cn } from "@/lib/utils"
 import dynamic from "next/dynamic"
 
 const EndOfDayChart = dynamic(() => import("@/components/end-of-day-chart"), { ssr: false })
+const AnalyticsDashboard = dynamic(() => import("@/components/analytics-dashboard"), { ssr: false })
 
 const viewMeta: Record<ViewId, { title: string; subtitle: string }> = {
   "live-log": { title: "Live log", subtitle: "Type the receipt details. The ledger updates as you go." },
   history: { title: "History", subtitle: "Review all past transactions logged today." },
   "end-of-day": { title: "End of Day", subtitle: "Daily summary and settlement report." },
+  analytics: { title: "Analytics", subtitle: "Advanced trends, breakdowns, and performance metrics." },
   machines: { title: "Machines", subtitle: "Manage and monitor your registered machines." },
 }
 
@@ -33,6 +38,7 @@ function getViewMeta(view: ViewId): { title: string; subtitle: string } {
 const STORAGE_KEY = "agent-ledger-initialized"
 
 export default function Home() {
+  const { user, loading: authLoading, sessionId } = useAuth()
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [activeView, setActiveView] = useState<ViewId>("live-log")
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -41,15 +47,27 @@ export default function Home() {
   const [showClearConfirm, setShowClearConfirm] = useState(false)
   const { theme, setTheme } = useTheme()
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-green-50/40 dark:bg-zinc-950 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  if (!user) {
+    return <LoginForm />
+  }
+
   // Persist transactions to localStorage for receipt page
   useEffect(() => {
-    localStorage.setItem("agent-ledger-transactions", JSON.stringify(transactions))
+    safeSetItem("agent-ledger-transactions", JSON.stringify(transactions))
   }, [transactions])
 
   // Load demo data on first visit, then try Supabase
   useEffect(() => {
     const init = async () => {
-      const alreadyInitialized = localStorage.getItem(STORAGE_KEY)
+      const alreadyInitialized = safeGetItem(STORAGE_KEY)
 
       if (supabase && isSupabaseConfigured()) {
         const { data, error } = await supabase
@@ -62,7 +80,7 @@ export default function Home() {
           const mapped = data.map(fromDbTransaction).filter(Boolean) as Transaction[]
           setTransactions(mapped)
           setSupabaseConnected(true)
-          localStorage.setItem(STORAGE_KEY, "true")
+          safeSetItem(STORAGE_KEY, "true")
           return
         }
       }
@@ -70,7 +88,7 @@ export default function Home() {
       if (!alreadyInitialized) {
         const demo = generateDemoTransactions()
         setTransactions(demo)
-        localStorage.setItem(STORAGE_KEY, "true")
+        safeSetItem(STORAGE_KEY, "true")
       }
     }
 
@@ -98,12 +116,20 @@ export default function Home() {
   const handleClearAll = useCallback(async () => {
     setShowClearConfirm(false)
     setTransactions([])
-    localStorage.removeItem(STORAGE_KEY)
-    localStorage.removeItem("agent-ledger-transactions")
+    safeRemoveItem(STORAGE_KEY)
+    safeRemoveItem("agent-ledger-transactions")
 
     if (supabase && isSupabaseConfigured()) {
       try {
-        await supabase.from("transactions").delete().neq("id", "00000000-0000-0000-0000-000000000000")
+        // Fetch all IDs first, then delete in batches
+        const { data: ids } = await supabase
+          .from("transactions")
+          .select("id")
+          .limit(1000)
+
+        if (ids && ids.length > 0) {
+          await supabase.from("transactions").delete().in("id", ids.map(r => r.id))
+        }
       } catch (err) {
         console.error("Supabase clear failed", err)
       }
@@ -113,7 +139,7 @@ export default function Home() {
   const handleResetDemo = useCallback(() => {
     const demo = generateDemoTransactions()
     setTransactions(demo)
-    localStorage.setItem(STORAGE_KEY, "true")
+    safeSetItem(STORAGE_KEY, "true")
   }, [])
 
   const handleExportCSV = useCallback(() => {
@@ -270,6 +296,20 @@ export default function Home() {
                 <div className="flex-1 flex items-center justify-center border-2 border-dashed border-green-200 dark:border-zinc-700 rounded-xl">
                   <p className="text-sm text-gray-400 dark:text-zinc-500">
                     No transactions today. Log some transactions first.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeView === "analytics" && (
+            <div className="h-full max-w-4xl mx-auto flex flex-col">
+              {transactions.length > 0 ? (
+                <AnalyticsDashboard transactions={transactions} />
+              ) : (
+                <div className="flex-1 flex items-center justify-center border-2 border-dashed border-green-200 dark:border-zinc-700 rounded-xl">
+                  <p className="text-sm text-gray-400 dark:text-zinc-500">
+                    No data to analyze. Log some transactions first.
                   </p>
                 </div>
               )}

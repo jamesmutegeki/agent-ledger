@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="64" fill="#16a34a"/>
+  <g transform="translate(256,256)">
+    <!-- Book icon -->
+    <path d="M-100,-60 L100,-60 L100,80 L-100,80 Z" fill="none" stroke="white" stroke-width="20" rx="8"/>
+    <line x1="-100" y1="-20" x2="100" y2="-20" stroke="white" stroke-width="6"/>
+    <line x1="-100" y1="20" x2="60" y2="20" stroke="white" stroke-width="6"/>
+    <line x1="-100" y1="60" x2="60" y2="60" stroke="white" stroke-width="6"/>
+    <!-- Open book detail -->
+    <path d="M100,-60 L120,-40 L120,80 L100,80" fill="none" stroke="white" stroke-width="20" rx="4"/>
+  </g>
+</svg>

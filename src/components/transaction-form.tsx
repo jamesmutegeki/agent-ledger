@@ -32,20 +32,26 @@ const txTypes: {
 ]
 
 function playChime() {
+  // Check if we're in a browser environment and have user activation
+  if (typeof window === 'undefined' || typeof AudioContext === 'undefined') return;
+  
+  // Check for user activation (modern browsers)
+  if ('userActivation' in navigator && !navigator.userActivation.isActive) return;
+  
   try {
-    const ctx = new AudioContext()
-    const osc = ctx.createOscillator()
-    const gain = ctx.createGain()
-    osc.connect(gain)
-    gain.connect(ctx.destination)
-    osc.frequency.value = 880
-    osc.type = "sine"
-    gain.gain.setValueAtTime(0.3, ctx.currentTime)
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15)
-    osc.start()
-    osc.stop(ctx.currentTime + 0.15)
-  } catch {
-    // Audio not available
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 880;
+    osc.type = "sine";
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.15);
+  } catch (err) {
+    console.warn("Audio not available:", err);
   }
 }
 

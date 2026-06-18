@@ -1,13 +1,18 @@
 import type { Transaction } from "./types"
 
 export function exportTransactionsToCSV(transactions: Transaction[], filename = "transactions.csv") {
+  if (typeof window === "undefined" || typeof document === "undefined") {
+    console.warn("CSV export not available in this environment")
+    return
+  }
+
   const headers = ["ID", "Time", "Type", "Amount (UGX)", "Reference", "Status", "Commission (UGX)"]
   const rows = transactions.map((t) => [
     t.id.slice(0, 8),
-    t.timestamp,
-    t.type,
+    `"${t.timestamp}"`,
+    `"${t.type}"`,
     t.amount.toString(),
-    t.reference || "",
+    `"${t.reference || ""}"`,
     t.isSuccessful ? "Success" : "Failed",
     t.commission.toString(),
   ])

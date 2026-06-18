@@ -15,7 +15,7 @@ export interface Transaction {
   commission: number
 }
 
-export type ViewId = "live-log" | "history" | "end-of-day" | "machines"
+export type ViewId = "live-log" | "history" | "end-of-day" | "analytics" | "machines"
 
 export const positiveTypes: TransactionType[] = ["deposit", "float-topup"]
 
