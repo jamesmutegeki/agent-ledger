@@ -75,3 +75,35 @@ body {
   background: #d1d5db;
   border-radius: 4px;
 }
+
+/* ── Ambient login background ── */
+
+@keyframes ambient-drift-1 {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(60px, 40px) scale(1.08); }
+}
+
+@keyframes ambient-drift-2 {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-50px, -30px) scale(1.05); }
+}
+
+@keyframes ambient-drift-3 {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(30px, -50px) scale(1.12); }
+}
+
+@keyframes ambient-float-1 {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.3; }
+  50% { transform: translateY(-20px) scale(1.3); opacity: 0.6; }
+}
+
+@keyframes ambient-float-2 {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.2; }
+  50% { transform: translateY(-15px) scale(1.5); opacity: 0.5; }
+}
+
+@keyframes ambient-float-3 {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.25; }
+  50% { transform: translateY(-25px) scale(1.2); opacity: 0.55; }
+}

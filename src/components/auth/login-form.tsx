@@ -4,6 +4,7 @@ import { useState } from "react"
 import { LogIn, UserPlus, BookOpen, Eye, EyeOff } from "lucide-react"
 import { useAuth } from "@/lib/auth"
 import { cn } from "@/lib/utils"
+import { AmbientBackground } from "./ambient-background"
 
 interface LoginFormProps {
   onComplete?: () => void
@@ -45,7 +46,8 @@ export function LoginForm({ onComplete }: LoginFormProps) {
   }
 
   return (
-    <div className="min-h-screen bg-green-50/40 dark:bg-zinc-950 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-green-50/40 dark:bg-zinc-950 flex items-center justify-center p-4 relative">
+      <AmbientBackground />
       <div className="w-full max-w-sm bg-white dark:bg-zinc-900 border border-green-200 dark:border-zinc-800 rounded-2xl p-8 shadow-sm">
         <div className="text-center mb-6">
           <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center mx-auto mb-3">
