@@ -172,7 +172,7 @@ export function TransactionForm({ onLogTransaction }: TransactionFormProps) {
               <div
                 className={cn(
                   "w-3.5 h-3.5 bg-white dark:bg-zinc-900 rounded-full shadow-sm transition-transform duration-200 mt-[2px]",
-                  isSuccessful ? "translate-x-[18px]" : "translate-x-[2px]"
+                  isSuccessful ? "translate-x-[20px]" : "translate-x-[2px]"
                 )}
               />
             </div>

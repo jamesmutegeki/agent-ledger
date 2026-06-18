@@ -2,10 +2,10 @@
 
 export function AmbientBackground() {
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+    <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
       {/* Gradient orb 1 — top-left */}
       <div
-        className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full opacity-20 dark:opacity-10"
+        className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full opacity-40 dark:opacity-20"
         style={{
           background:
             "radial-gradient(circle at 30% 40%, #16a34a 0%, #059669 40%, transparent 70%)",
@@ -15,7 +15,7 @@ export function AmbientBackground() {
 
       {/* Gradient orb 2 — bottom-right */}
       <div
-        className="absolute -bottom-40 -right-40 w-[600px] h-[600px] rounded-full opacity-15 dark:opacity-8"
+        className="absolute -bottom-40 -right-40 w-[600px] h-[600px] rounded-full opacity-30 dark:opacity-16"
         style={{
           background:
             "radial-gradient(circle at 70% 60%, #22c55e 0%, #059669 30%, transparent 65%)",
@@ -25,7 +25,7 @@ export function AmbientBackground() {
 
       {/* Gradient orb 3 — center-right, subtle */}
       <div
-        className="absolute top-1/3 -right-20 w-[350px] h-[350px] rounded-full opacity-10 dark:opacity-5"
+        className="absolute top-1/3 -right-20 w-[350px] h-[350px] rounded-full opacity-20 dark:opacity-10"
         style={{
           background:
             "radial-gradient(circle at 50% 50%, #34d399 0%, transparent 60%)",

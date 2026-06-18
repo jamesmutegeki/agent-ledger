@@ -7,6 +7,7 @@ import { Sidebar } from "@/components/sidebar"
 import { TransactionForm } from "@/components/transaction-form"
 import { ActivityFeed } from "@/components/activity-feed"
 import { LoginForm } from "@/components/auth/login-form"
+import { LandingPage } from "@/components/landing-page"
 import type { Transaction, ViewId } from "@/lib/types"
 import { isInflow } from "@/lib/types"
 import { useAuth } from "@/lib/auth"
@@ -24,6 +25,7 @@ const STORAGE_KEY = "agent-ledger-initialized"
 
 export default function Home() {
   const { user, loading: authLoading, sessionId } = useAuth()
+  const [showLanding, setShowLanding] = useState(true)
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [activeView, setActiveView] = useState<ViewId>("live-log")
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -139,14 +141,22 @@ export default function Home() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-[#0a0a0a] flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-gray-300 dark:border-gray-600 border-t-transparent rounded-full animate-spin" />
-      </div>
+      <>
+        {showLanding && <LandingPage onContinue={() => setShowLanding(false)} />}
+        <div className="min-h-screen bg-white dark:bg-[#0a0a0a] flex items-center justify-center">
+          <div className="w-6 h-6 border-2 border-gray-300 dark:border-gray-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+      </>
     )
   }
 
   if (!user) {
-    return <LoginForm />
+    return (
+      <>
+        {showLanding && <LandingPage onContinue={() => setShowLanding(false)} />}
+        <LoginForm />
+      </>
+    )
   }
 
   const headerTitle = {
@@ -158,7 +168,9 @@ export default function Home() {
   }[activeView]
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a] flex">
+    <>
+      {showLanding && <LandingPage onContinue={() => setShowLanding(false)} />}
+      <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a] flex">
       {sidebarOpen && <Sidebar activeView={activeView} onNavigate={setActiveView} />}
 
       <div className="flex-1 flex flex-col min-h-screen w-0">
@@ -345,5 +357,6 @@ export default function Home() {
         </div>
       )}
     </div>
+    </>
   )
 }
