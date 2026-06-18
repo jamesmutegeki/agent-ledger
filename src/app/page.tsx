@@ -47,17 +47,7 @@ export default function Home() {
   const [showClearConfirm, setShowClearConfirm] = useState(false)
   const { theme, setTheme } = useTheme()
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-green-50/40 dark:bg-zinc-950 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
-  }
-
-  if (!user) {
-    return <LoginForm />
-  }
+  // --- ALL hooks must be BEFORE any early return (Rules of Hooks) ---
 
   // Persist transactions to localStorage for receipt page
   useEffect(() => {
@@ -166,6 +156,20 @@ export default function Home() {
   }, [transactions])
 
   const meta = getViewMeta(activeView)
+
+  // --- Early returns (safe — all hooks already called above) ---
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-green-50/40 dark:bg-zinc-950 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  if (!user) {
+    return <LoginForm />
+  }
 
   return (
     <div className="min-h-screen bg-green-50/40 dark:bg-zinc-950 flex">
