@@ -46,7 +46,7 @@ export function LoginForm({ onComplete }: LoginFormProps) {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0a0a0a] flex items-center justify-center p-4 relative">
+    <div className="min-h-screen bg-green-50/40 dark:bg-zinc-950 flex items-center justify-center p-4 relative">
       <AmbientBackground />
       <div className="w-full max-w-sm bg-white dark:bg-[#141414] rounded-2xl p-8 shadow-lg shadow-black/5 dark:shadow-black/20">
         <div className="text-center mb-8">
