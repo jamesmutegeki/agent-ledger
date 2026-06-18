@@ -21,7 +21,7 @@ export function LandingPage({ onContinue }: LandingPageProps) {
       onClick={handleClick}
       className={`
         fixed inset-0 z-50 flex flex-col items-center justify-center cursor-pointer select-none
-        transition-opacity duration-500 ease-in-out
+        bg-zinc-950 transition-opacity duration-500 ease-in-out
         ${fadingOut ? "opacity-0" : "opacity-100"}
       `}
     >
