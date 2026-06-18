@@ -1,16 +1,10 @@
 "use client"
 
 import { useMemo } from "react"
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts"
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts"
 import type { Transaction } from "@/lib/types"
 
-const TYPE_COLORS: Record<string, string> = {
-  deposit: "#16a34a",
-  withdrawal: "#ef4444",
-  "bill-payment": "#3b82f6",
-  airtime: "#a855f7",
-  "float-topup": "#059669",
-}
+const CHART_COLORS = ["#a3a3a3", "#808080", "#5c5c5c", "#3d3d3d", "#262626"]
 
 const TYPE_LABELS: Record<string, string> = {
   deposit: "Deposit",
@@ -40,11 +34,11 @@ export default function EndOfDayChart({ transactions }: EndOfDayChartProps) {
   if (pieData.length === 0) return null
 
   return (
-    <div className="bg-gray-50 dark:bg-zinc-800/50 rounded-xl p-4 border border-gray-100 dark:border-zinc-700">
-      <p className="text-xs text-gray-400 dark:text-zinc-500 uppercase font-medium mb-3">
+    <div>
+      <p className="text-xs text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide mb-4">
         Amount by Type
       </p>
-      <div className="h-64">
+      <div className="h-56">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -56,23 +50,18 @@ export default function EndOfDayChart({ transactions }: EndOfDayChartProps) {
               paddingAngle={3}
               dataKey="value"
             >
-              {pieData.map((entry) => (
-                <Cell
-                  key={entry.name}
-                  fill={TYPE_COLORS[entry.name.toLowerCase().replace(" ", "-")] || "#6b7280"}
-                />
+              {pieData.map((entry, i) => (
+                <Cell key={entry.name} fill={CHART_COLORS[i % CHART_COLORS.length]} />
               ))}
             </Pie>
             <Tooltip
               formatter={(value) => [`UGX ${Number(value).toLocaleString()}`, "Amount"]}
               contentStyle={{
                 borderRadius: "8px",
-                border: "1px solid #e5e7eb",
+                border: "1px solid #e5e5e5",
                 fontSize: "12px",
+                background: "#fff",
               }}
-            />
-            <Legend
-              wrapperStyle={{ fontSize: "11px" }}
             />
           </PieChart>
         </ResponsiveContainer>

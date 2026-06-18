@@ -3,20 +3,14 @@
 import { useMemo } from "react"
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend,
+  PieChart, Pie, Cell,
   AreaChart, Area,
 } from "recharts"
 import type { Transaction } from "@/lib/types"
 import { isInflow } from "@/lib/types"
 import { formatCurrency } from "@/lib/format"
 
-const COLORS = {
-  inflow: "#16a34a",
-  outflow: "#ef4444",
-  commission: "#059669",
-}
-
-const CHART_COLORS = ["#16a34a", "#ef4444", "#3b82f6", "#a855f7", "#059669"]
+const CHART_COLORS = ["#a3a3a3", "#737373", "#525252", "#404040", "#262626"]
 
 interface AnalyticsDashboardProps {
   transactions: Transaction[]
@@ -34,7 +28,6 @@ export default function AnalyticsDashboard({ transactions }: AnalyticsDashboardP
     const netProfit = totalInflow - totalOutflow
     const successRate = transactions.filter((t) => t.isSuccessful).length / transactions.length * 100
 
-    // Types breakdown
     const byType = transactions.reduce(
       (acc, t) => {
         acc[t.type] = (acc[t.type] || 0) + t.amount
@@ -43,7 +36,6 @@ export default function AnalyticsDashboard({ transactions }: AnalyticsDashboardP
       {} as Record<string, number>
     )
 
-    // Hourly distribution (simulated from timestamp strings like "11:42 AM")
     const hourlyBuckets: Record<string, number> = {}
     transactions.forEach((t) => {
       const match = t.timestamp.match(/(\d+):(\d+)\s*(AM|PM)/)
@@ -60,10 +52,6 @@ export default function AnalyticsDashboard({ transactions }: AnalyticsDashboardP
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([hour, amount]) => ({ hour, amount }))
 
-    // Success rate pie data
-    const successCount = transactions.filter((t) => t.isSuccessful).length
-    const failedCount = transactions.length - successCount
-
     return {
       totalInflow,
       totalOutflow,
@@ -73,16 +61,12 @@ export default function AnalyticsDashboard({ transactions }: AnalyticsDashboardP
       count: transactions.length,
       byType,
       hourlyData,
-      successData: [
-        { name: "Successful", value: successCount },
-        { name: "Failed", value: failedCount },
-      ],
     }
   }, [transactions])
 
   if (!stats) {
     return (
-      <div className="flex items-center justify-center h-64 text-sm text-gray-400 dark:text-zinc-500">
+      <div className="flex items-center justify-center h-64 text-sm text-gray-400 dark:text-gray-500">
         No data to analyze. Log some transactions first.
       </div>
     )
@@ -93,40 +77,44 @@ export default function AnalyticsDashboard({ transactions }: AnalyticsDashboardP
     value,
   }))
 
+  const barData = [
+    { name: "Inflow", amount: stats.totalInflow },
+    { name: "Outflow", amount: stats.totalOutflow },
+    { name: "Commission", amount: stats.totalCommission },
+  ]
+
   return (
     <div className="space-y-6">
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-white dark:bg-zinc-900 rounded-xl p-4 border border-green-200 dark:border-zinc-800">
-          <p className="text-[10px] text-gray-400 uppercase font-medium">Revenue</p>
-          <p className="text-lg font-bold text-green-700 dark:text-green-400 mt-1">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-gray-100 dark:bg-zinc-800 rounded-xl overflow-hidden">
+        <div className="bg-white dark:bg-zinc-900 p-5">
+          <p className="text-[11px] text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">Revenue</p>
+          <p className="text-lg font-semibold text-gray-900 dark:text-gray-100 mt-1">
             {formatCurrency(stats.totalInflow)}
           </p>
         </div>
-        <div className="bg-white dark:bg-zinc-900 rounded-xl p-4 border border-green-200 dark:border-zinc-800">
-          <p className="text-[10px] text-gray-400 uppercase font-medium">Expenses</p>
-          <p className="text-lg font-bold text-red-600 dark:text-red-400 mt-1">
+        <div className="bg-white dark:bg-zinc-900 p-5">
+          <p className="text-[11px] text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">Expenses</p>
+          <p className="text-lg font-semibold text-gray-900 dark:text-gray-100 mt-1">
             {formatCurrency(stats.totalOutflow)}
           </p>
         </div>
-        <div className="bg-white dark:bg-zinc-900 rounded-xl p-4 border border-green-200 dark:border-zinc-800">
-          <p className="text-[10px] text-gray-400 uppercase font-medium">Net Profit</p>
-          <p className={`text-lg font-bold mt-1 ${stats.netProfit >= 0 ? "text-green-700 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+        <div className="bg-white dark:bg-zinc-900 p-5">
+          <p className="text-[11px] text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">Net Profit</p>
+          <p className={`text-lg font-semibold mt-1 ${stats.netProfit >= 0 ? "text-gray-900 dark:text-gray-100" : "text-gray-900 dark:text-gray-100"}`}>
             {stats.netProfit >= 0 ? "+" : ""}{formatCurrency(stats.netProfit)}
           </p>
         </div>
-        <div className="bg-white dark:bg-zinc-900 rounded-xl p-4 border border-green-200 dark:border-zinc-800">
-          <p className="text-[10px] text-gray-400 uppercase font-medium">Success Rate</p>
-          <p className="text-lg font-bold text-gray-800 dark:text-zinc-200 mt-1">
+        <div className="bg-white dark:bg-zinc-900 p-5">
+          <p className="text-[11px] text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">Success Rate</p>
+          <p className="text-lg font-semibold text-gray-900 dark:text-gray-100 mt-1">
             {stats.successRate.toFixed(1)}%
           </p>
         </div>
       </div>
 
-      {/* Amount by Type Pie Chart */}
-      <div className="bg-white dark:bg-zinc-900 rounded-xl p-4 border border-green-200 dark:border-zinc-800">
-        <p className="text-xs text-gray-400 uppercase font-medium mb-3">Amount by Type</p>
-        <div className="h-72">
+      <div className="bg-white dark:bg-zinc-900 rounded-xl p-6 shadow-sm shadow-black/5 dark:shadow-black/10">
+        <p className="text-xs text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide mb-4">Amount by Type</p>
+        <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -142,33 +130,47 @@ export default function AnalyticsDashboard({ transactions }: AnalyticsDashboardP
                   <Cell key={entry.name} fill={CHART_COLORS[i % CHART_COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip formatter={(value: unknown) => [formatCurrency(Number(value)), "Amount"]} />
-              <Legend wrapperStyle={{ fontSize: "11px" }} />
+              <Tooltip
+                formatter={(value: unknown) => [formatCurrency(Number(value)), "Amount"]}
+                contentStyle={{
+                  borderRadius: "8px",
+                  border: "1px solid #e5e5e5",
+                  fontSize: "12px",
+                  background: "#fff",
+                }}
+              />
             </PieChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      {/* Hourly Trend */}
       {stats.hourlyData.length > 0 && (
-        <div className="bg-white dark:bg-zinc-900 rounded-xl p-4 border border-green-200 dark:border-zinc-800">
-          <p className="text-xs text-gray-400 uppercase font-medium mb-3">Hourly Transaction Volume</p>
+        <div className="bg-white dark:bg-zinc-900 rounded-xl p-6 shadow-sm shadow-black/5 dark:shadow-black/10">
+          <p className="text-xs text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide mb-4">Hourly Volume</p>
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={stats.hourlyData}>
                 <defs>
                   <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#16a34a" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#16a34a" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#737373" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="#737373" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="hour" tick={{ fontSize: 10 }} />
-                <YAxis tick={{ fontSize: 10 }} />
-                <Tooltip formatter={(value: unknown) => [formatCurrency(Number(value)), "Volume"]} />
+                <XAxis dataKey="hour" tick={{ fontSize: 10, fill: "#a3a3a3" }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: "#a3a3a3" }} axisLine={false} tickLine={false} />
+                <Tooltip
+                  formatter={(value: unknown) => [formatCurrency(Number(value)), "Volume"]}
+                  contentStyle={{
+                    borderRadius: "8px",
+                    border: "1px solid #e5e5e5",
+                    fontSize: "12px",
+                    background: "#fff",
+                  }}
+                />
                 <Area
                   type="monotone"
                   dataKey="amount"
-                  stroke="#16a34a"
+                  stroke="#525252"
                   fillOpacity={1}
                   fill="url(#colorAmount)"
                 />
@@ -178,35 +180,23 @@ export default function AnalyticsDashboard({ transactions }: AnalyticsDashboardP
         </div>
       )}
 
-      {/* Inflow vs Outflow Bar */}
-      <div className="bg-white dark:bg-zinc-900 rounded-xl p-4 border border-green-200 dark:border-zinc-800">
-        <p className="text-xs text-gray-400 uppercase font-medium mb-3">Inflow vs Outflow</p>
+      <div className="bg-white dark:bg-zinc-900 rounded-xl p-6 shadow-sm shadow-black/5 dark:shadow-black/10">
+        <p className="text-xs text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide mb-4">Inflow vs Outflow</p>
         <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={[
-                { name: "Inflow", amount: stats.totalInflow },
-                { name: "Outflow", amount: stats.totalOutflow },
-                { name: "Commission", amount: stats.totalCommission },
-              ]}
-            >
-              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 10 }} />
-              <Tooltip formatter={(value: unknown) => [formatCurrency(Number(value)), "Amount"]} />
-              <Bar dataKey="amount" radius={[6, 6, 0, 0]}>
-                {[
-                  { name: "Inflow", amount: stats.totalInflow },
-                  { name: "Outflow", amount: stats.totalOutflow },
-                  { name: "Commission", amount: stats.totalCommission },
-                ].map((entry, i) => (
-                  <Cell
-                    key={entry.name}
-                    fill={
-                      i === 0 ? COLORS.inflow : i === 1 ? COLORS.outflow : COLORS.commission
-                    }
-                  />
-                ))}
-              </Bar>
+            <BarChart data={barData}>
+              <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#a3a3a3" }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 10, fill: "#a3a3a3" }} axisLine={false} tickLine={false} />
+              <Tooltip
+                formatter={(value: unknown) => [formatCurrency(Number(value)), "Amount"]}
+                contentStyle={{
+                  borderRadius: "8px",
+                  border: "1px solid #e5e5e5",
+                  fontSize: "12px",
+                  background: "#fff",
+                }}
+              />
+              <Bar dataKey="amount" radius={[4, 4, 0, 0]} fill="#737373" />
             </BarChart>
           </ResponsiveContainer>
         </div>

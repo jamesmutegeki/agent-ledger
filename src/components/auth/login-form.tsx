@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { LogIn, UserPlus, BookOpen, Eye, EyeOff } from "lucide-react"
+import { LogIn, UserPlus, Eye, EyeOff } from "lucide-react"
 import { useAuth } from "@/lib/auth"
 import { cn } from "@/lib/utils"
 import { AmbientBackground } from "./ambient-background"
@@ -46,15 +46,14 @@ export function LoginForm({ onComplete }: LoginFormProps) {
   }
 
   return (
-    <div className="min-h-screen bg-green-50/40 dark:bg-zinc-950 flex items-center justify-center p-4 relative">
+    <div className="min-h-screen bg-white dark:bg-[#0a0a0a] flex items-center justify-center p-4 relative">
       <AmbientBackground />
-      <div className="w-full max-w-sm bg-white dark:bg-zinc-900 border border-green-200 dark:border-zinc-800 rounded-2xl p-8 shadow-sm">
-        <div className="text-center mb-6">
-          <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center mx-auto mb-3">
-            <BookOpen className="w-6 h-6 text-green-600 dark:text-green-400" />
-          </div>
-          <h1 className="text-lg font-bold text-green-800 dark:text-green-400">Agent Ledger</h1>
-          <p className="text-xs text-gray-400 dark:text-zinc-500 mt-1">
+      <div className="w-full max-w-sm bg-white dark:bg-[#141414] rounded-2xl p-8 shadow-lg shadow-black/5 dark:shadow-black/20">
+        <div className="text-center mb-8">
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            Agent Ledger
+          </h1>
+          <p className="text-sm text-gray-400 dark:text-gray-500 mt-1.5">
             {mode === "login" ? "Sign in to your account" : "Create a new account"}
           </p>
         </div>
@@ -62,7 +61,7 @@ export function LoginForm({ onComplete }: LoginFormProps) {
         <form onSubmit={handleSubmit} className="space-y-4">
           {mode === "signup" && (
             <div>
-              <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1.5">
+              <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
                 Full Name
               </label>
               <input
@@ -71,13 +70,13 @@ export function LoginForm({ onComplete }: LoginFormProps) {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="John Doe"
                 required
-                className="w-full px-3 py-2.5 border border-gray-200 dark:border-zinc-700 rounded-lg text-sm text-gray-800 dark:text-zinc-200 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 transition-all"
+                className="w-full px-3.5 py-2.5 rounded-lg text-sm text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-zinc-800/50 border border-gray-200 dark:border-zinc-700 focus:outline-none focus:ring-1 focus:ring-gray-400 dark:focus:ring-gray-500 focus:border-transparent transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500"
               />
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1.5">
+            <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
               Email
             </label>
             <input
@@ -86,12 +85,12 @@ export function LoginForm({ onComplete }: LoginFormProps) {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="agent@example.com"
               required
-              className="w-full px-3 py-2.5 border border-gray-200 dark:border-zinc-700 rounded-lg text-sm text-gray-800 dark:text-zinc-200 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 transition-all"
+              className="w-full px-3.5 py-2.5 rounded-lg text-sm text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-zinc-800/50 border border-gray-200 dark:border-zinc-700 focus:outline-none focus:ring-1 focus:ring-gray-400 dark:focus:ring-gray-500 focus:border-transparent transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1.5">
+            <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
               Password
             </label>
             <div className="relative">
@@ -102,12 +101,12 @@ export function LoginForm({ onComplete }: LoginFormProps) {
                 placeholder="••••••••"
                 required
                 minLength={4}
-                className="w-full px-3 py-2.5 pr-10 border border-gray-200 dark:border-zinc-700 rounded-lg text-sm text-gray-800 dark:text-zinc-200 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 transition-all"
+                className="w-full px-3.5 py-2.5 pr-10 rounded-lg text-sm text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-zinc-800/50 border border-gray-200 dark:border-zinc-700 focus:outline-none focus:ring-1 focus:ring-gray-400 dark:focus:ring-gray-500 focus:border-transparent transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -115,7 +114,7 @@ export function LoginForm({ onComplete }: LoginFormProps) {
           </div>
 
           {error && (
-            <p className="text-xs text-red-500 dark:text-red-400 text-center bg-red-50 dark:bg-red-950/30 py-2 rounded-md">
+            <p className="text-xs text-red-500 dark:text-red-400 text-center py-2 px-3 rounded-lg bg-red-50 dark:bg-red-950/30">
               {error}
             </p>
           )}
@@ -124,10 +123,10 @@ export function LoginForm({ onComplete }: LoginFormProps) {
             type="submit"
             disabled={loading}
             className={cn(
-              "w-full flex items-center justify-center gap-2 font-medium py-2.5 px-4 rounded-lg text-sm transition-all shadow-sm",
+              "w-full flex items-center justify-center gap-2 font-medium py-2.5 px-4 rounded-lg text-sm transition-all",
               loading
-                ? "bg-green-400 text-white cursor-not-allowed"
-                : "bg-green-600 hover:bg-green-700 text-white active:scale-[0.98]"
+                ? "bg-gray-200 dark:bg-zinc-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                : "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-200 active:scale-[0.98]"
             )}
           >
             {loading ? (
@@ -146,18 +145,18 @@ export function LoginForm({ onComplete }: LoginFormProps) {
           </button>
         </form>
 
-        <p className="text-xs text-gray-400 dark:text-zinc-500 text-center mt-4">
+        <p className="text-sm text-gray-400 dark:text-gray-500 text-center mt-6">
           {mode === "login" ? (
             <>
-              Don't have an account?{" "}
-              <button onClick={switchMode} className="text-green-600 dark:text-green-400 hover:underline font-medium">
+              Don&apos;t have an account?{" "}
+              <button onClick={switchMode} className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 font-medium hover:underline transition-all">
                 Sign up
               </button>
             </>
           ) : (
             <>
               Already have an account?{" "}
-              <button onClick={switchMode} className="text-green-600 dark:text-green-400 hover:underline font-medium">
+              <button onClick={switchMode} className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 font-medium hover:underline transition-all">
                 Sign in
               </button>
             </>

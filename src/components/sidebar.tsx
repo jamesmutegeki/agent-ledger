@@ -22,66 +22,62 @@ export function Sidebar({ activeView, onNavigate }: SidebarProps) {
   const { user, logout } = useAuth()
 
   return (
-    <aside className="w-60 min-h-screen border-r border-green-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex flex-col shrink-0">
-      <div className="p-5 border-b border-green-100 dark:border-zinc-800">
-        <div className="flex items-center gap-2 mb-1">
-          <BookOpen className="w-5 h-5 text-green-600 dark:text-green-400" />
-          <h1 className="text-lg font-bold text-green-800 dark:text-green-400 tracking-tight">
+    <aside className="w-56 min-h-screen bg-white dark:bg-zinc-900 flex flex-col shrink-0 border-r border-gray-100 dark:border-zinc-800">
+      <div className="px-5 pt-6 pb-5">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-lg bg-gray-100 dark:bg-zinc-800 flex items-center justify-center">
+            <BookOpen className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" />
+          </div>
+          <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">
             Agent Ledger
-          </h1>
+          </span>
         </div>
-        <p className="text-xs text-gray-400 dark:text-zinc-500 ml-7">Balance the books</p>
       </div>
 
-      <div className="p-4">
-        <p className="text-xs font-medium text-gray-400 dark:text-zinc-500 uppercase tracking-wider mb-2">
-          Workspace
-        </p>
-        <nav className="flex flex-col gap-1">
-          {navItems.map((item) => {
-            const Icon = item.icon
-            const isActive = item.id === activeView
-            return (
-              <button
-                key={item.id}
-                onClick={() => onNavigate(item.id)}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all w-full text-left",
-                  isActive
-                    ? "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400"
-                    : "text-gray-500 dark:text-zinc-400 hover:bg-green-50 dark:hover:bg-zinc-800 hover:text-green-600 dark:hover:text-green-400"
-                )}
-              >
-                <Icon className="w-4 h-4 shrink-0" />
-                {item.label}
-              </button>
-            )
-          })}
-        </nav>
-      </div>
+      <nav className="flex-1 px-3 space-y-0.5">
+        {navItems.map((item) => {
+          const Icon = item.icon
+          const isActive = item.id === activeView
+          return (
+            <button
+              key={item.id}
+              onClick={() => onNavigate(item.id)}
+              className={cn(
+                "flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm transition-all duration-150 text-left",
+                isActive
+                  ? "bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-gray-100 font-medium"
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800/50"
+              )}
+            >
+              <Icon className="w-4 h-4 shrink-0" />
+              {item.label}
+            </button>
+          )
+        })}
+      </nav>
 
       {user && (
-        <div className="mt-auto p-4 border-t border-green-100 dark:border-zinc-800">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center shrink-0">
-              <User className="w-4 h-4 text-green-600 dark:text-green-400" />
+        <div className="px-4 py-4 border-t border-gray-100 dark:border-zinc-800">
+          <div className="flex items-center gap-3">
+            <div className="w-7 h-7 rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center shrink-0">
+              <User className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-gray-700 dark:text-zinc-300 truncate">
+              <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate leading-tight">
                 {user.name}
               </p>
-              <p className="text-[10px] text-gray-400 dark:text-zinc-500 truncate">
+              <p className="text-[11px] text-gray-400 dark:text-gray-500 truncate">
                 {user.machineId}
               </p>
             </div>
+            <button
+              onClick={logout}
+              className="shrink-0 p-1.5 rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-all"
+              title="Sign out"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
           </div>
-          <button
-            onClick={logout}
-            className="flex items-center gap-2 w-full px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            Sign out
-          </button>
         </div>
       )}
     </aside>

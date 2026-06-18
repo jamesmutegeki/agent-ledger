@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useCallback, useMemo, useEffect } from "react"
-import { PanelRightOpen, PanelLeftClose, Sun, Moon, Monitor, Database, Trash2, AlertTriangle } from "lucide-react"
+import { PanelRightOpen, PanelLeftClose, Sun, Moon, Monitor, Trash2, Database } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Sidebar } from "@/components/sidebar"
 import { TransactionForm } from "@/components/transaction-form"
@@ -15,25 +15,10 @@ import { supabase, isSupabaseConfigured, toDbTransaction, fromDbTransaction } fr
 import { formatCurrency } from "@/lib/format"
 import { exportTransactionsToCSV } from "@/lib/csv"
 import { safeGetItem, safeSetItem, safeRemoveItem } from "@/lib/storage"
-import { cn } from "@/lib/utils"
 import dynamic from "next/dynamic"
 
 const EndOfDayChart = dynamic(() => import("@/components/end-of-day-chart"), { ssr: false })
 const AnalyticsDashboard = dynamic(() => import("@/components/analytics-dashboard"), { ssr: false })
-
-const viewMeta: Record<ViewId, { title: string; subtitle: string }> = {
-  "live-log": { title: "Live log", subtitle: "Type the receipt details. The ledger updates as you go." },
-  history: { title: "History", subtitle: "Review all past transactions logged today." },
-  "end-of-day": { title: "End of Day", subtitle: "Daily summary and settlement report." },
-  analytics: { title: "Analytics", subtitle: "Advanced trends, breakdowns, and performance metrics." },
-  machines: { title: "Machines", subtitle: "Manage and monitor your registered machines." },
-}
-
-function getViewMeta(view: ViewId): { title: string; subtitle: string } {
-  const meta = viewMeta[view]
-  if (!meta) throw new Error(`Unknown view: ${view}`)
-  return meta
-}
 
 const STORAGE_KEY = "agent-ledger-initialized"
 
@@ -49,12 +34,10 @@ export default function Home() {
 
   // --- ALL hooks must be BEFORE any early return (Rules of Hooks) ---
 
-  // Persist transactions to localStorage for receipt page
   useEffect(() => {
     safeSetItem("agent-ledger-transactions", JSON.stringify(transactions))
   }, [transactions])
 
-  // Load demo data on first visit, then try Supabase
   useEffect(() => {
     const init = async () => {
       const alreadyInitialized = safeGetItem(STORAGE_KEY)
@@ -111,7 +94,6 @@ export default function Home() {
 
     if (supabase && isSupabaseConfigured()) {
       try {
-        // Fetch all IDs first, then delete in batches
         const { data: ids } = await supabase
           .from("transactions")
           .select("id")
@@ -155,14 +137,10 @@ export default function Home() {
     return { totalInflow, totalOutflow, totalCommission, count: transactions.length, byType }
   }, [transactions])
 
-  const meta = getViewMeta(activeView)
-
-  // --- Early returns (safe — all hooks already called above) ---
-
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-green-50/40 dark:bg-zinc-950 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-white dark:bg-[#0a0a0a] flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-gray-300 dark:border-gray-600 border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
@@ -171,52 +149,59 @@ export default function Home() {
     return <LoginForm />
   }
 
+  const headerTitle = {
+    "live-log": "Live Log",
+    history: "History",
+    "end-of-day": "End of Day",
+    analytics: "Analytics",
+    machines: "Machines",
+  }[activeView]
+
   return (
-    <div className="min-h-screen bg-green-50/40 dark:bg-zinc-950 flex">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a] flex">
       {sidebarOpen && <Sidebar activeView={activeView} onNavigate={setActiveView} />}
 
       <div className="flex-1 flex flex-col min-h-screen w-0">
-        <header className="h-14 border-b border-green-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex items-center justify-between px-5 shrink-0">
+        <header className="h-14 bg-white dark:bg-zinc-900 flex items-center justify-between px-6 shrink-0">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen((prev) => !prev)}
-              className="text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors"
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
             >
-              {sidebarOpen ? <PanelLeftClose className="w-5 h-5" /> : <PanelRightOpen className="w-5 h-5" />}
+              {sidebarOpen ? <PanelLeftClose className="w-4 h-4" /> : <PanelRightOpen className="w-4 h-4" />}
             </button>
-            <div>
-              <h2 className="text-base font-bold text-green-800 dark:text-green-400">{meta.title}</h2>
-              <p className="text-xs text-gray-400 dark:text-zinc-500 leading-tight">{meta.subtitle}</p>
-            </div>
+            <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+              {headerTitle}
+            </h2>
           </div>
-          <div className="flex items-center gap-2">
-            {syncing && <span className="text-[10px] text-green-600 dark:text-green-400 animate-pulse">syncing...</span>}
-            {supabaseConnected && <Database className="w-3.5 h-3.5 text-green-500" />}
+          <div className="flex items-center gap-3">
+            {syncing && <span className="text-[11px] text-gray-400 dark:text-gray-500">Syncing...</span>}
+            {supabaseConnected && <Database className="w-3.5 h-3.5 text-gray-400" />}
             <button
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors"
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
             >
-              {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
           </div>
         </header>
 
-        <main className="flex-1 p-5 min-h-0 overflow-auto">
+        <main className="flex-1 px-6 py-6 min-h-0 overflow-auto">
           {activeView === "live-log" && (
-            <div className="h-full flex flex-col lg:flex-row gap-5">
-              <div className="lg:w-[440px] shrink-0 self-start lg:self-stretch flex flex-col">
+            <div className="h-full flex flex-col lg:flex-row gap-6">
+              <div className="lg:w-[420px] shrink-0 self-start lg:self-stretch flex flex-col">
                 <TransactionForm onLogTransaction={handleLogTransaction} />
-                <div className="flex gap-2 mt-3">
+                <div className="flex gap-3 mt-4">
                   <button
                     onClick={handleResetDemo}
-                    className="text-[11px] text-gray-400 dark:text-zinc-500 hover:text-green-600 dark:hover:text-green-400 transition-colors flex items-center gap-1"
+                    className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
                   >
                     Load demo data
                   </button>
                   {transactions.length > 0 && (
                     <button
                       onClick={() => setShowClearConfirm(true)}
-                      className="text-[11px] text-gray-400 dark:text-zinc-500 hover:text-red-500 transition-colors flex items-center gap-1"
+                      className="text-xs text-gray-400 dark:text-gray-500 hover:text-red-500 transition-colors flex items-center gap-1"
                     >
                       <Trash2 className="w-3 h-3" />
                       Clear all
@@ -231,35 +216,31 @@ export default function Home() {
           )}
 
           {activeView === "history" && (
-            <div className="h-full max-w-3xl mx-auto flex flex-col">
+            <div className="h-full max-w-2xl mx-auto flex flex-col">
               <ActivityFeed transactions={transactions} compact showExport onExportCSV={handleExportCSV} />
             </div>
           )}
 
           {activeView === "end-of-day" && (
-            <div className="h-full max-w-3xl mx-auto flex flex-col">
+            <div className="h-full max-w-2xl mx-auto flex flex-col">
               {summary ? (
-                <div className="bg-white dark:bg-zinc-900 border border-green-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm">
-                  <h3 className="text-sm font-bold text-green-800 dark:text-green-400 mb-4">
-                    End of Day Summary
-                  </h3>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                    <div className="bg-green-50 dark:bg-green-950/30 rounded-xl p-4 border border-green-100 dark:border-green-900">
-                      <p className="text-xs text-gray-400 dark:text-zinc-500 uppercase font-medium">Total Inflow</p>
-                      <p className="text-xl font-bold text-green-700 dark:text-green-400 mt-1">
+                <div className="bg-white dark:bg-zinc-900 rounded-xl p-6 shadow-sm shadow-black/5 dark:shadow-black/10">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-gray-100 dark:bg-zinc-800 rounded-xl overflow-hidden mb-6">
+                    <div className="bg-white dark:bg-zinc-900 p-5">
+                      <p className="text-xs text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">Inflow</p>
+                      <p className="text-lg font-semibold text-gray-900 dark:text-gray-100 mt-1">
                         {formatCurrency(summary.totalInflow)}
                       </p>
                     </div>
-                    <div className="bg-red-50 dark:bg-red-950/30 rounded-xl p-4 border border-red-100 dark:border-red-900">
-                      <p className="text-xs text-gray-400 dark:text-zinc-500 uppercase font-medium">Total Outflow</p>
-                      <p className="text-xl font-bold text-red-600 dark:text-red-400 mt-1">
+                    <div className="bg-white dark:bg-zinc-900 p-5">
+                      <p className="text-xs text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">Outflow</p>
+                      <p className="text-lg font-semibold text-gray-900 dark:text-gray-100 mt-1">
                         {formatCurrency(summary.totalOutflow)}
                       </p>
                     </div>
-                    <div className="bg-emerald-50 dark:bg-emerald-950/30 rounded-xl p-4 border border-emerald-100 dark:border-emerald-900">
-                      <p className="text-xs text-gray-400 dark:text-zinc-500 uppercase font-medium">Total Commission</p>
-                      <p className="text-xl font-bold text-emerald-700 dark:text-emerald-400 mt-1">
+                    <div className="bg-white dark:bg-zinc-900 p-5">
+                      <p className="text-xs text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">Commission</p>
+                      <p className="text-lg font-semibold text-gray-900 dark:text-gray-100 mt-1">
                         {formatCurrency(summary.totalCommission)}
                       </p>
                     </div>
@@ -267,38 +248,38 @@ export default function Home() {
 
                   <EndOfDayChart transactions={transactions} />
 
-                  <div className="bg-gray-50 dark:bg-zinc-800/50 rounded-xl p-4 border border-gray-100 dark:border-zinc-700 mt-6">
-                    <p className="text-xs text-gray-400 dark:text-zinc-500 uppercase font-medium mb-3">
+                  <div className="mt-6 pt-5 border-t border-gray-100 dark:border-zinc-800">
+                    <p className="text-xs text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide mb-3">
                       Transactions by Type
                     </p>
                     <div className="space-y-2">
                       {Object.entries(summary.byType).map(([type, count]) => (
-                        <div key={type} className="flex items-center justify-between">
-                          <span className="text-sm text-gray-700 dark:text-zinc-300 capitalize">
+                        <div key={type} className="flex items-center justify-between py-1">
+                          <span className="text-sm text-gray-600 dark:text-gray-400 capitalize">
                             {type.replace("-", " ")}
                           </span>
-                          <span className="text-sm font-semibold text-gray-800 dark:text-zinc-200">{count}</span>
+                          <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{count}</span>
                         </div>
                       ))}
                     </div>
-                    <div className="border-t border-gray-200 dark:border-zinc-700 mt-3 pt-2 flex items-center justify-between">
-                      <span className="text-sm font-semibold text-gray-800 dark:text-zinc-200">Total Transactions</span>
-                      <span className="text-sm font-bold text-green-700 dark:text-green-400">{summary.count}</span>
+                    <div className="flex items-center justify-between pt-2 mt-2 border-t border-gray-100 dark:border-zinc-800">
+                      <span className="text-sm font-medium text-gray-800 dark:text-gray-200">Total</span>
+                      <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{summary.count}</span>
                     </div>
                   </div>
 
-                  <div className="mt-4 flex justify-end">
+                  <div className="mt-5 flex justify-end">
                     <button
                       onClick={handleExportCSV}
-                      className="text-xs text-green-600 dark:text-green-400 hover:underline"
+                      className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
                     >
                       Export CSV
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className="flex-1 flex items-center justify-center border-2 border-dashed border-green-200 dark:border-zinc-700 rounded-xl">
-                  <p className="text-sm text-gray-400 dark:text-zinc-500">
+                <div className="flex-1 flex items-center justify-center">
+                  <p className="text-sm text-gray-400 dark:text-gray-500">
                     No transactions today. Log some transactions first.
                   </p>
                 </div>
@@ -311,8 +292,8 @@ export default function Home() {
               {transactions.length > 0 ? (
                 <AnalyticsDashboard transactions={transactions} />
               ) : (
-                <div className="flex-1 flex items-center justify-center border-2 border-dashed border-green-200 dark:border-zinc-700 rounded-xl">
-                  <p className="text-sm text-gray-400 dark:text-zinc-500">
+                <div className="flex-1 flex items-center justify-center">
+                  <p className="text-sm text-gray-400 dark:text-gray-500">
                     No data to analyze. Log some transactions first.
                   </p>
                 </div>
@@ -321,14 +302,14 @@ export default function Home() {
           )}
 
           {activeView === "machines" && (
-            <div className="h-full max-w-3xl mx-auto flex flex-col">
-              <div className="bg-white dark:bg-zinc-900 border border-green-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm">
-                <h3 className="text-sm font-bold text-green-800 dark:text-green-400 mb-4">Registered Machines</h3>
-                <div className="flex items-center gap-4 p-4 bg-green-50 dark:bg-green-950/30 rounded-lg border border-green-100 dark:border-green-900">
-                  <Monitor className="w-10 h-10 text-green-600 dark:text-green-400 shrink-0" />
+            <div className="h-full max-w-2xl mx-auto flex flex-col">
+              <div className="bg-white dark:bg-zinc-900 rounded-xl p-6 shadow-sm shadow-black/5 dark:shadow-black/10">
+                <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-4">Registered Machines</h3>
+                <div className="flex items-center gap-4 p-4 rounded-lg bg-gray-50 dark:bg-zinc-800/50">
+                  <Monitor className="w-8 h-8 text-gray-400 shrink-0" />
                   <div>
-                    <p className="text-sm font-semibold text-gray-800 dark:text-zinc-200">Machine #001</p>
-                    <p className="text-xs text-gray-400 dark:text-zinc-500">
+                    <p className="text-sm font-medium text-gray-800 dark:text-gray-200">Machine #001</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500">
                       Active &middot; Last sync: {new Date().toLocaleTimeString()}
                     </p>
                   </div>
@@ -339,31 +320,23 @@ export default function Home() {
         </main>
       </div>
 
-      {/* Confirmation dialog */}
       {showClearConfirm && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-zinc-900 rounded-xl p-6 shadow-xl max-w-sm mx-4 border border-green-200 dark:border-zinc-800">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-                <AlertTriangle className="w-5 h-5 text-red-500" />
-              </div>
-              <div>
-                <p className="font-semibold text-gray-800 dark:text-zinc-200 text-sm">Clear all transactions?</p>
-                <p className="text-xs text-gray-400 dark:text-zinc-500">
-                  This will permanently delete all {transactions.length} transactions.
-                </p>
-              </div>
-            </div>
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-zinc-900 rounded-xl p-6 shadow-xl max-w-sm mx-4">
+            <p className="font-medium text-gray-900 dark:text-gray-100 text-sm mb-1">Clear all transactions?</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mb-5">
+              This will permanently delete all {transactions.length} transactions.
+            </p>
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setShowClearConfirm(false)}
-                className="px-4 py-2 text-sm border border-gray-200 dark:border-zinc-700 rounded-lg text-gray-600 dark:text-zinc-400 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"
+                className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleClearAll}
-                className="px-4 py-2 text-sm bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                className="px-4 py-2 text-sm bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors"
               >
                 Delete all
               </button>
