@@ -15,6 +15,7 @@ type AuthContextType = {
   loading: boolean
   login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>
   signup: (name: string, email: string, password: string) => Promise<{ ok: boolean; error?: string }>
+  demoLogin: () => Promise<{ ok: boolean; error?: string }>
   logout: () => void
   sessionId: string
 }
@@ -102,13 +103,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { ok: true }
   }, [])
 
+  const demoLogin = useCallback(async () => {
+    const raw = safeGetItem(USERS_KEY)
+    const users: { email: string; password: string; name: string; id: string }[] = raw
+      ? JSON.parse(raw)
+      : []
+
+    let demoUser = users.find((u) => u.email === "demo@agent-ledger.app")
+
+    if (!demoUser) {
+      const id = crypto.randomUUID?.() || `user_${Date.now()}`
+      demoUser = { id, name: "Demo Agent", email: "demo@agent-ledger.app", password: "demo123" }
+      users.push(demoUser)
+      safeSetItem(USERS_KEY, JSON.stringify(users))
+    }
+
+    const agentUser: AgentUser = {
+      id: demoUser.id,
+      name: demoUser.name,
+      email: demoUser.email,
+      machineId: `MC-${demoUser.id.slice(0, 6).toUpperCase()}`,
+    }
+
+    setUser(agentUser)
+    safeSetItem(CURRENT_USER_KEY, JSON.stringify(agentUser))
+    return { ok: true }
+  }, [])
+
   const logout = useCallback(() => {
     setUser(null)
     safeRemoveItem(CURRENT_USER_KEY)
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout, sessionId }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, demoLogin, logout, sessionId }}>
       {children}
     </AuthContext.Provider>
   )

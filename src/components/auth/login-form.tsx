@@ -11,7 +11,7 @@ interface LoginFormProps {
 }
 
 export function LoginForm({ onComplete }: LoginFormProps) {
-  const { login, signup } = useAuth()
+  const { login, signup, demoLogin } = useAuth()
   const [mode, setMode] = useState<"login" | "signup">("login")
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
@@ -144,6 +144,31 @@ export function LoginForm({ onComplete }: LoginFormProps) {
             )}
           </button>
         </form>
+
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-200 dark:border-zinc-700" />
+          </div>
+          <div className="relative flex justify-center text-xs">
+            <span className="bg-white dark:bg-[#141414] px-3 text-gray-400 dark:text-gray-500">or</span>
+          </div>
+        </div>
+
+        <button
+          onClick={async () => {
+            setError(null)
+            setLoading(true)
+            const result = await demoLogin()
+            setLoading(false)
+            if (!result.ok) setError(result.error || "Demo login failed")
+            else onComplete?.()
+          }}
+          disabled={loading}
+          className="w-full flex items-center justify-center gap-2 font-medium py-2.5 px-4 rounded-lg text-sm transition-all border border-gray-300 dark:border-zinc-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 active:scale-[0.98] disabled:opacity-50"
+        >
+          <LogIn className="w-4 h-4" />
+          Demo Login
+        </button>
 
         <p className="text-sm text-gray-400 dark:text-gray-500 text-center mt-6">
           {mode === "login" ? (
