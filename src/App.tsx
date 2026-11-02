@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { cn } from "./utils/cn";
-import { useCountdown, useLocalStorage } from "./hooks";
+import { useCountdown, useLocalStorage, exportData, importData } from "./hooks";
 import {
   OWNERS,
   type Owner,
@@ -123,6 +123,7 @@ export default function App() {
   const [dod, setDod] = useLocalStorage<Record<number, boolean>>("br-roadmap-dod", {});
   const [names, setNames] = useLocalStorage<Record<string, string>>("br-roadmap-names", {});
   const [copied, setCopied] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
 
   const allTaskIds = weeks.flatMap((w) => w.blocks.flatMap((b) => b.tasks.map((_, i) => `${b.id}-${i}`)));
   const doneCount = allTaskIds.filter((id) => done[id]).length;
@@ -141,6 +142,21 @@ export default function App() {
       /* ignore */
     }
   };
+
+  useEffect(() => {
+    if (importFile) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          importData(e.target?.result as string);
+        } catch (err) {
+          alert("Failed to import: " + (err as Error).message);
+        }
+        setImportFile(null);
+      };
+      reader.readAsText(importFile);
+    }
+  }, [importFile]);
 
   const renderWeek = (wi: number) => {
     const week = weeks[wi];
@@ -334,6 +350,13 @@ export default function App() {
                     Reset
                   </button>
                 )}
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button onClick={exportData} className="text-xs px-2 py-1 rounded border border-zinc-700 hover:bg-zinc-800 transition">Export JSON</button>
+                <label className="text-xs px-2 py-1 rounded border border-zinc-700 hover:bg-zinc-800 transition cursor-pointer">
+                  Import JSON
+                  <input type="file" accept=".json" className="hidden" onChange={(e) => setImportFile(e.target.files?.[0] ?? null)} />
+                </label>
               </div>
             </div>
           </div>
